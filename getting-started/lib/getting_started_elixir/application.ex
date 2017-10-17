@@ -8,6 +8,9 @@ defmodule GettingStartedElixir.Application do
 
     # Define workers and child supervisors to be supervised
     children = [
+      # Start the Ecto repository
+      supervisor(GettingStartedElixir.Repo, []),
+
       # Start the endpoint when the application starts
       supervisor(GettingStartedElixirWeb.Endpoint, []),
       # Start your own worker by calling: GettingStartedElixir.Worker.start_link(arg1, arg2, arg3)

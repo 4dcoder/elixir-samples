@@ -5,6 +5,9 @@
 # is restricted to this project.
 use Mix.Config
 
+config :getting_started_elixir,
+  ecto_repos: [GettingStartedElixir.Repo]
+
 # Configures the endpoint
 config :getting_started_elixir, GettingStartedElixirWeb.Endpoint,
   url: [host: "localhost"],
@@ -24,3 +27,27 @@ import_config "#{Mix.env}.exs"
 
 config :goth,
   json: {:system, "GCP_CREDENTIALS"}
+
+# If using Datastore, use this line
+config :getting_started_elixir, :storage_engine, GettingStartedElixir.DatastoreRepo
+
+# If using Postgres or MySQL, use this line
+# config :getting_started_elixir, :storage_engine, GettingStartedElixir.Repo
+
+# If using Postgres, set configuration variables here
+# config :getting_started_elixir, GettingStartedElixir.Repo,
+#   adapter: Ecto.Adapters.Postgres,
+#   database: "YOUR_DATABASE_NAME",
+#   username: "YOUR_CLOUDSQL_USER",
+#   password: "YOUR_CLOUDSQL_PASSWORD",
+#   socket: "/cloudsql/INSTANCE_CONNECTION_NAME",
+#   pool_size: 10
+
+# If using MySQL, set configuration variables here
+# config :getting_started_elixir, GettingStartedElixir.Repo,
+#   adapter: Ecto.Adapters.MySQL,
+#   database: "YOUR_DATABASE_NAME",
+#   username: "YOUR_CLOUDSQL_USER",
+#   password: "YOUR_CLOUDSQL_PASSWORD",
+#   socket: "/cloudsql/INSTANCE_CONNECTION_NAME",
+#   pool_size: 10

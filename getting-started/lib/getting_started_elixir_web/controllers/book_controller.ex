@@ -1,10 +1,19 @@
 defmodule GettingStartedElixirWeb.BookController do
   use GettingStartedElixirWeb, :controller
 
-  alias GettingStartedElixir.{Book, DatastoreRepo}
+  alias GettingStartedElixir.Book
+
+  @repo Application.fetch_env!(:getting_started_elixir, :storage_engine)
+
+  import Ecto.Query
 
   def index(conn, _params) do
-    books = Book.find_all(10)
+    books =
+      Book
+      |> order_by(:title)
+      |> limit(10)
+      |> offset(0)
+      |> @repo.all
 
     conn
     |> assign(:books, books)
@@ -20,9 +29,10 @@ defmodule GettingStartedElixirWeb.BookController do
   end
 
   def create(conn, %{"book" => book_params}) do
-    changeset = Book.changeset(%Book{id: UUID.uuid4()}, book_params)
-
-    case DatastoreRepo.insert(changeset) do
+    %Book{id: UUID.uuid4()}
+    |> Book.changeset(book_params)
+    |> @repo.insert()
+    |> case do
       {:ok, book} ->
         conn
         |> redirect(to: book_path(conn, :show, book.id))
@@ -30,11 +40,10 @@ defmodule GettingStartedElixirWeb.BookController do
         conn
         |> render("new.html", changeset: changeset)
     end
-
   end
 
   def show(conn, %{"id" => id}) do
-    book = DatastoreRepo.get(Book, id)
+    book = @repo.get(Book, id)
 
     conn
     |> assign(:book, book)
@@ -42,16 +51,15 @@ defmodule GettingStartedElixirWeb.BookController do
   end
 
   def delete(conn, %{"id" => id}) do
-    DatastoreRepo.get(Book, id)
-    |> DatastoreRepo.delete()
+    @repo.get(Book, id)
+    |> @repo.delete()
 
     conn
     |> redirect(to: book_path(conn, :index))
   end
 
   def edit(conn, %{"id" => id}) do
-    changeset = DatastoreRepo.get(Book, id)
-    |> IO.inspect
+    changeset = @repo.get(Book, id)
     |> Book.changeset()
 
     conn
@@ -59,10 +67,11 @@ defmodule GettingStartedElixirWeb.BookController do
   end
 
   def update(conn, %{"id" => id, "book" => book_params}) do
-    changeset = DatastoreRepo.get(Book, id)
+    Book
+    |> @repo.get(id)
     |> Book.changeset(book_params)
-
-    case DatastoreRepo.update(changeset) do
+    |> @repo.update()
+    |> case do
       {:ok, book} ->
         conn
         |> redirect(to: book_path(conn, :show, book.id))

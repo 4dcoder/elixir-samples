@@ -9,6 +9,7 @@ defmodule GettingStartedElixir.Mixfile do
       elixirc_paths: elixirc_paths(Mix.env),
       compilers: [:phoenix, :gettext] ++ Mix.compilers,
       start_permanent: Mix.env == :prod,
+      aliases: aliases(),
       deps: deps()
     ]
   end
@@ -39,10 +40,32 @@ defmodule GettingStartedElixir.Mixfile do
       {:phoenix_ecto, "~> 3.2"},
       {:gettext, "~> 0.11"},
       {:cowboy, "~> 1.0"},
-      {:diplomat, "~> 0.2"},
       {:goth, "~> 0.5.1"},
       {:uuid, "~> 1.1"},
-      {:ecto, "~> 2.1"}
+      {:ecto, "~> 2.1"},
+
+      # If using Datastore
+      {:diplomat, "~> 0.2"},
+
+      # If using Postgres
+      {:postgrex, github: "elixir-ecto/postgrex", override: true},
+
+      # If using MySQL or MariaDB
+      {:mariaex, "~> 0.8"}
+    ]
+  end
+
+  # Aliases are shortcuts or tasks specific to the current project.
+  # For example, to create, migrate and run the seeds file at once:
+  #
+  #     $ mix ecto.setup
+  #
+  # See the documentation for `Mix` for more info on aliases.
+  defp aliases do
+    [
+      "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
+      "ecto.reset": ["ecto.drop", "ecto.setup"],
+      "test": ["ecto.create --quiet", "ecto.migrate", "test"]
     ]
   end
 end

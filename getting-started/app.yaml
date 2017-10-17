@@ -1,2 +1,5 @@
 env: flex
 runtime: gs://elixir-runtime/elixir.yaml
+
+beta_settings:
+  cloud_sql_instances: INSTANCE_CONNECTION_NAME

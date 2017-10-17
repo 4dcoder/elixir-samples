@@ -2,10 +2,13 @@ defmodule GettingStartedElixir.Book do
   use Ecto.Schema
   import Ecto.Changeset
 
-  schema "Book" do
+  @primary_key {:id, :binary_id, autogenerate: true}
+  @derive {Phoenix.Param, key: :id}
+
+  schema "Books" do
     field :title
     field :author
-    field :published_date
+    field :published_date, :date
     field :image_url
     field :description
   end
@@ -14,20 +17,6 @@ defmodule GettingStartedElixir.Book do
     book
     |> cast(params, [:title, :author, :published_date, :description])
     |> validate_required([:title, :author, :published_date, :description])
-  end
-
-  def find_all(limit), do: find_all(limit, 0)
-  def find_all(limit, offset) do
-    Diplomat.Query.new(
-      "SELECT * FROM `Book` ORDER BY `title` LIMIT @limit OFFSET @offset",
-      %{limit: limit, offset: offset}
-    ) |> Diplomat.Query.execute
-  end
-
-  def find(id) do
-    Diplomat.Key.new("Book", id)
-    |> Diplomat.Key.get()
-    |> Enum.at(0)
   end
 
 end

@@ -46,4 +46,50 @@ defmodule GettingStartedElixir.DatastoreRepo do
     |> Diplomat.Transaction.delete(key)
     |> Diplomat.Transaction.commit
   end
+
+  def all(queryable, opts \\ []) do
+    select = select(queryable)
+    from = from(queryable)
+    where = where(queryable)
+    order_by = order_by(queryable)
+    limit = limit(queryable)
+    offset = offset(queryable)
+
+    [select, from, where, order_by, limit, offset]
+    |> IO.iodata_to_binary()
+    |> Diplomat.Query.new()
+    |> Diplomat.Query.execute()
+  end
+
+  defp select(_queryable), do: "SELECT *"
+  defp from(queryable), do: [" FROM `", elem(queryable.from, 0), "`"]
+  defp where(_queryable), do: []
+  defp order_by(%{order_bys: order_bys}) do
+    [" ORDER BY " |
+      intersperse_map(order_bys, ", ", fn %{expr: expr} ->
+        intersperse_map(expr, ", ", &order_by_expr/1)
+      end)
+    ]
+  end
+  defp order_by_expr({dir, expr}) do
+    {{_, [], [_, field]}, _, _} = expr
+    str = "`#{field}`"
+    case dir do
+      :asc  -> str
+      :desc -> [str | " DESC"]
+    end
+  end
+
+  defp limit(%{limit: %{expr: limit}}), do: " LIMIT #{limit}"
+  defp limit(_), do: []
+  defp offset(%{offset: %{expr: offset}}), do: " OFFSET #{offset}"
+  defp offset(_), do: []
+
+  defp intersperse_map(list, separator, mapper, acc \\ [])
+  defp intersperse_map([], _separator, _mapper, acc),
+    do: acc
+  defp intersperse_map([elem], _separator, mapper, acc),
+    do: [acc | mapper.(elem)]
+  defp intersperse_map([elem | rest], separator, mapper, acc),
+    do: intersperse_map(rest, separator, mapper, [acc, mapper.(elem), separator])
 end
